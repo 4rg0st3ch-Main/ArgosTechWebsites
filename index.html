@@ -222,27 +222,11 @@
     }
 
     // --- 4. ADMIN & UTILITIES ---
-    async function checkPass() {
-        const adminEmail = "YOUR_EMAIL@HERE.COM"; // <--- Change this!
-        const inputPass = document.getElementById('passInput').value;
-
-        try {
-            // Logs you in to Firebase
-            const userCredential = await auth.signInWithEmailAndPassword(adminEmail, inputPass);
-            const user = userCredential.user;
-
-            // Checks if your UID is in the "admins" list we made in Step 2
-            const snapshot = await db.ref('admins/' + user.uid).get();
-            
-            if (snapshot.exists() && snapshot.val() === true) {
-                isAdmin = true;
-                document.getElementById('mainBody').classList.add('admin-active');
-                alert("Admin Access Authorized.");
-            } else {
-                alert("You are logged in, but not an admin.");
-            }
-        } catch (error) {
-            alert("Login Failed: " + error.message);
+    function checkPass() {
+        if(document.getElementById('passInput').value === "strider101") {
+            isAdmin = true;
+            document.getElementById('mainBody').classList.add('admin-active');
+            alert("Admin Access Authorized");
         }
     }
 
