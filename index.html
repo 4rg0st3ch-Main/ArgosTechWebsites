@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Arena - Tournament System</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #000; color: #fff; margin: 0; padding: 0; overflow-x: hidden; }
+        #laserCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: #000; }
+        
+        /* Header Nav */
+        .nav-bar { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 60px; 
+            background: rgba(5, 5, 10, 0.95); border-bottom: 2px solid #ff0033;
+            display: flex; align-items: center; justify-content: center; gap: 30px; z-index: 1000;
+        }
+        .nav-btn { background: none; border: none; color: #fff; font-weight: bold; cursor: pointer; text-transform: uppercase; padding: 10px 15px; transition: 0.3s; opacity: 0.7; }
+        .nav-btn.active { color: #0066ff; opacity: 1; border-bottom: 2px solid #0066ff; text-shadow: 0 0 10px #0066ff; }
+
+        /* Admin Controls */
+        .admin-bar { position: fixed; top: 70px; right: 20px; display: flex; gap: 8px; z-index: 1000; background: rgba(0,0,0,0.9); padding: 10px; border-radius: 8px; border: 1px solid #444; }
+        .admin-bar input { width: 60px; background: #000; border: 1px solid #ff0033; color: #fff; padding: 5px; font-size: 12px; }
+
+        /* Main Screen Layout */
+        .screen { display: none; padding: 100px 40px 40px 40px; animation: fadeIn 0.4s ease-in; }
+        .active-screen { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Bracket Components */
+        .bracket-wrapper { display: flex; flex-direction: column; gap: 40px; }
+        .round-container { display: flex; gap: 30px; align-items: flex-start; overflow-x: auto; padding-bottom: 20px; }
+        .round { display: flex; flex-direction: column; gap: 20px; min-width: 200px; }
+        .matchup { background: rgba(10, 10, 15, 0.95); border: 1px solid #333; padding: 12px; border-radius: 6px; box-shadow: 0 0 15px rgba(0,0,0,1); }
+        .slot { display: flex; align-items: center; margin: 4px 0; gap: 5px; }
+        input[type="text"] { width: 100%; padding: 8px; background: #000; border: 1px solid #444; color: #0066ff; font-weight: bold; border-radius: 4px; font-size: 13px; outline: none; }
+        input[type="text"]:focus { border-color: #ff0033; }
+
+        /* Registration - Bottom Right */
+        .register-box { 
+            position: fixed; bottom: 20px; right: 20px; width: 230px; 
+            background: rgba(5, 5, 10, 0.98); padding: 15px; border-radius: 12px; border: 2px solid #ff0033; z-index: 1001;
+            box-shadow: 0 0 30px rgba(255, 0, 51, 0.2);
+        }
+        .reg-btn { background: #0066ff; color: #fff; width: 100%; padding: 10px; font-weight: bold; border: none; margin-top: 10px; cursor: pointer; text-transform: uppercase; border-radius: 4px; }
+        .spots-counter { font-size: 11px; color: #0066ff; text-align: center; margin-top: 8px; font-weight: 800; letter-spacing: 1px; }
+
+        /* Leaderboard */
+        .leaderboard-container { max-width: 700px; margin: auto; background: rgba(10, 10, 15, 0.95); padding: 30px; border: 1px solid #0066ff; border-radius: 10px; }
+        table { width: 100%; text-align: left; border-collapse: collapse; }
+        th { color: #0066ff; padding: 15px; border-bottom: 2px solid #0066ff; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #222; }
+
+        /* Admin Toggles */
+        .admin-only { display: none !important; }
+        .admin-active .admin-only { display: flex !important; }
+        .win-btn { background: #0f8; color: #000; border: none; padding: 4px 8px; cursor: pointer; font-weight: bold; font-size: 10px; border-radius: 3px; }
+        .lose-btn { background: #f33; color: #fff; border: none; padding: 4px 8px; cursor: pointer; font-weight: bold; font-size: 10px; border-radius: 3px; }
+        
+        h2 { color: #ff0033; text-transform: uppercase; letter-spacing: 2px; margin: 10px 0; border-left: 4px solid #ff0033; padding-left: 10px; }
+        h3 { font-size: 12px; color: #666; text-transform: uppercase; margin: 5px 0; }
+    </style>
+</head>
+<body id="mainBody">
+
+<canvas id="laserCanvas"></canvas>
+
+<div class="nav-bar">
+    <div style="position: absolute; left: 20px; color: #ff0033; font-weight: 900; letter-spacing: 2px;">Blast Warfare</div>
+    <button class="nav-btn active" id="btn-bracket" onclick="showScreen('bracket-screen')">Bracket</button>
+    <button class="nav-btn" id="btn-leaderboard" onclick="showScreen('leaderboard-screen')">Leaderboard</button>
+</div>
+
+<div class="admin-bar">
+    <input type="password" id="passInput" placeholder="Admin">
+    <button onclick="checkPass()" style="background:#ff0033; border:none; color:white; cursor:pointer; padding:5px 10px; font-weight:bold;">LOGIN</button>
+    <div class="admin-only" style="gap:5px; align-items:center;">
+        <input type="number" id="maxTeamsInput" value="4" style="width:40px">
+        <button onclick="updateConfig()" class="win-btn">SET TEAMS</button>
+        <button onclick="nukeAll()" style="background:red; color:white; border:none; padding:5px; font-size:10px; cursor:pointer;">NUKE DB</button>
+    </div>
+</div>
+
+<div id="bracket-screen" class="screen active-screen">
+    <div class="bracket-wrapper" id="dynamic-bracket-area"></div>
+</div>
+
+<div id="leaderboard-screen" class="screen">
+    <div class="leaderboard-container">
+        <h2>Rankings</h2>
+        <table>
+            <thead><tr><th>Rank</th><th>Team</th><th>Wins</th></tr></thead>
+            <tbody id="leaderboard-body"></tbody>
+        </table>
+        <div class="admin-only" style="margin-top:30px; flex-direction:column; border-top:1px dashed #555; padding-top:20px;">
+            <h3 style="color:#0f8;">Manual Stat Update</h3>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="statTeam" placeholder="Team Name" style="flex:2;">
+                <input type="number" id="statWins" placeholder="Wins" style="flex:1;">
+                <button onclick="updateStats()" class="win-btn" style="flex:1; padding:10px;">UPDATE</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="register-box" id="regBox">
+    <h3 style="margin:0 0 10px 0; color:#ff0033; font-size:0.9rem; text-align:center;">TEAM REGISTRATION</h3>
+    <input type="text" id="regTeamName" placeholder="Team Name" style="margin-bottom:8px; width:92%;">
+    <input type="email" id="regEmail" placeholder="Email" style="margin-bottom:8px; width:92%;">
+    <input type="password" id="regPass" placeholder="Enter Code" style="margin-bottom:8px; width:92%;">
+    <button class="reg-btn" onclick="registerTeam()">SEND VERIFICATION</button>
+    <div class="spots-counter" id="spotsLeft">Calculating...</div>
+</div>
+
+<script>
+    // --- 1. CONFIGURATION & FIREBASE ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyAEojqV48Km3cqmkxPmQIo1hdHICWd39jU",
+        authDomain: "mybracket-fda7e.firebaseapp.com",
+        databaseURL: "https://mybracket-fda7e-default-rtdb.firebaseio.com",
+        projectId: "mybracket-fda7e",
+        storageBucket: "mybracket-fda7e.firebasestorage.app",
+        messagingSenderId: "140220506190",
+        appId: "1:140220506190:web:33ad68013b3642d6aaa31f"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
+    let isAdmin = false;
+    let currentConfig = { maxTeams: 4 };
+
+    // --- 2. AUTH & AUTO-INSERT ---
+    auth.onAuthStateChanged(async (user) => {
+        if (user && user.emailVerified) {
+            const pendingRef = db.ref('pending/' + user.uid);
+            const snapshot = await pendingRef.get();
+            const data = snapshot.val();
+            
+            if (data && data.registered === false) {
+                const bSnap = await db.ref('bracket').get();
+                const bData = bSnap.val() || {};
+                const firstRoundMatches = currentConfig.maxTeams / 2;
+                let foundSlot = null;
+
+                for(let m=1; m <= firstRoundMatches; m++) {
+                    if(!bData[`w1-m${m}-t1`]) { foundSlot = `w1-m${m}-t1`; break; }
+                    if(!bData[`w1-m${m}-t2`]) { foundSlot = `w1-m${m}-t2`; break; }
+                }
+
+                if (foundSlot) {
+                    await db.ref('bracket/' + foundSlot).set(data.team);
+                    await pendingRef.update({ registered: true });
+                    alert("Success! " + data.team + " is now in the bracket.");
+                } else {
+                    alert("Tournament is currently full.");
+                }
+            }
+        }
+    });
+
+    // --- 3. BRACKET LOGIC ---
+    function renderBracket(data) {
+        const area = document.getElementById('dynamic-bracket-area');
+        area.innerHTML = '';
+
+        // Winners Section
+        createSection(area, "Winners Bracket", "w", data, false);
+        // Losers Section (Half Size)
+        createSection(area, "Redemption Bracket", "l", data, true);
+
+        // Grand Final
+        const gfHeader = document.createElement('h2'); gfHeader.innerText = "Grand Final"; area.appendChild(gfHeader);
+        const gfBox = document.createElement('div'); gfBox.className = "matchup"; gfBox.style.width = "260px";
+        gfBox.innerHTML = `
+            <div class="slot"><input type="text" id="gf-t1" value="${data['gf-t1']||''}" placeholder="Winner Side" onchange="updateDb('gf-t1', this.value)"></div>
+            <div style="text-align:center; font-size:10px; color:#444; margin:5px 0;">VS</div>
+            <div class="slot"><input type="text" id="gf-t2" value="${data['gf-t2']||''}" placeholder="Loser Side" onchange="updateDb('gf-t2', this.value)"></div>
+        `;
+        area.appendChild(gfBox);
+        checkRegStatus(data);
+    }
+
+    function createSection(parent, title, prefix, data, isLosers) {
+        const h = document.createElement('h2'); h.innerText = title; parent.appendChild(h);
+        const container = document.createElement('div'); container.className = 'round-container';
+        const totalRds = Math.log2(currentConfig.maxTeams);
+        const loopRds = isLosers ? totalRds - 1 : totalRds;
+
+        for(let r=1; r<=loopRds; r++) {
+            const rd = document.createElement('div'); rd.className = 'round';
+            rd.innerHTML = `<h3>Round ${r}</h3>`;
+            const matches = Math.pow(2, totalRds - r) / (isLosers ? 2 : 1);
+            for(let m=1; m<=Math.max(matches, 1); m++) {
+                const mid = `${prefix}${r}-m${m}`;
+                const mDiv = document.createElement('div'); mDiv.className = 'matchup';
+                [1,2].forEach(t => {
+                    const id = `${mid}-t${t}`;
+                    const slot = document.createElement('div'); slot.className = 'slot';
+                    let nextM = Math.ceil(m/2); let nextT = (m % 2 === 0) ? 2 : 1;
+                    let winPath = (r === loopRds) ? (isLosers ? "gf-t2" : "gf-t1") : `${prefix}${r+1}-m${nextM}-t${nextT}`;
+                    let losePath = `l1-m${m}-t${t}`;
+
+                    slot.innerHTML = `
+                        <input type="text" id="${id}" value="${data[id]||''}" onchange="updateDb('${id}', this.value)">
+                        <div class="admin-only" style="gap:2px;">
+                            <button class="win-btn" onclick="move('${id}', '${winPath}')">W</button>
+                            ${!isLosers ? `<button class="lose-btn" onclick="move('${id}', '${losePath}')">L</button>` : ''}
+                        </div>
+                    `;
+                    mDiv.appendChild(slot);
+                });
+                rd.appendChild(mDiv);
+            }
+            container.appendChild(rd);
+        }
+        parent.appendChild(container);
+    }
+
+    // --- 4. ADMIN & UTILITIES ---
+    function checkPass() {
+        if(document.getElementById('passInput').value === "strider101") {
+            isAdmin = true;
+            document.getElementById('mainBody').classList.add('admin-active');
+            alert("Admin Access Authorized");
+        }
+    }
+
+    function move(from, to) { if(isAdmin) db.ref('bracket/'+to).set(document.getElementById(from).value); }
+    function updateDb(id, val) { if(isAdmin) db.ref('bracket/'+id).set(val); }
+    function updateConfig() { db.ref('config').set({ maxTeams: parseInt(document.getElementById('maxTeamsInput').value) }); }
+    function updateStats() {
+        const t = document.getElementById('statTeam').value;
+        const w = document.getElementById('statWins').value;
+        if(t) db.ref('leaderboard/'+t).set({team: t, wins: parseInt(w)});
+    }
+    function nukeAll() { if(confirm("CLEAR ALL DATA?")) db.ref('/').set(null).then(()=>location.reload()); }
+
+    function checkRegStatus(data) {
+        let count = 0;
+        const matchesR1 = currentConfig.maxTeams / 2;
+        for(let m=1; m<=matchesR1; m++) {
+            if(data[`w1-m${m}-t1`]) count++;
+            if(data[`w1-m${m}-t2`]) count++;
+        }
+        const left = currentConfig.maxTeams - count;
+        document.getElementById('spotsLeft').innerText = left + " SPOTS REMAINING";
+        document.getElementById('regBox').style.display = (left <= 0) ? 'none' : 'block';
+    }
+
+    async function registerTeam() {
+        const email = document.getElementById('regEmail').value.trim();
+        const team = document.getElementById('regTeamName').value.trim();
+        if(document.getElementById('regPass').value !== "player123") return alert("Invalid Registration Password");
+        try {
+            const userCred = await auth.createUserWithEmailAndPassword(email, "TempPass123!");
+            await userCred.user.sendEmailVerification();
+            await db.ref('pending/' + userCred.user.uid).set({ team: team, registered: false });
+            alert("Verification email sent! Click the link in your email to join the bracket.");
+        } catch (e) { alert(e.message); }
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active-screen');
+        document.getElementById('btn-'+id.split('-')[0]).classList.add('active');
+    }
+
+    // --- 5. DATA SYNC ---
+    db.ref('config').on('value', snap => { if(snap.exists()) currentConfig = snap.val(); });
+    db.ref('bracket').on('value', snap => renderBracket(snap.val() || {}));
+    db.ref('leaderboard').on('value', snap => {
+        const body = document.getElementById('leaderboard-body'); body.innerHTML = '';
+        const items = Object.values(snap.val() || {}).sort((a,b) => b.wins - a.wins);
+        items.forEach((item, i) => { body.innerHTML += `<tr><td>#${i+1}</td><td>${item.team}</td><td>${item.wins}</td></tr>`; });
+    });
+
+    // --- 6. RED vs BLUE BOUNCING BOLTS ---
+    const canvas = document.getElementById('laserCanvas');
+    const ctx = canvas.getContext('2d');
+    let bolts = [];
+    const MIN_SPEED = 3.5;
+    const MAX_SPEED = 7.0;
+
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.addEventListener('resize', resize); resize();
+
+    class GlowBolt {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.speed = MIN_SPEED + Math.random() * (MAX_SPEED - MIN_SPEED);
+            let angle = Math.random() * Math.PI * 2;
+            this.dx = Math.cos(angle) * this.speed;
+            this.dy = Math.sin(angle) * this.speed;
+            this.length = 35;
+            this.thickness = 4;
+            this.color = Math.random() > 0.5 ? '#ff0033' : '#0066ff';
+        }
+        draw() {
+            this.x += this.dx; this.y += this.dy;
+            if (this.x < 0 || this.x > canvas.width) { this.dx *= -1; this.applyPhysics(); }
+            if (this.y < 0 || this.y > canvas.height) { this.dy *= -1; this.applyPhysics(); }
+
+            ctx.save();
+            ctx.shadowBlur = 20; ctx.shadowColor = this.color;
+            ctx.strokeStyle = this.color; ctx.lineWidth = this.thickness; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(this.x, this.y);
+            let angle = Math.atan2(this.dy, this.dx);
+            ctx.lineTo(this.x - Math.cos(angle) * this.length, this.y - Math.sin(angle) * this.length);
+            ctx.stroke(); ctx.restore();
+        }
+        applyPhysics() {
+            let currentAngle = Math.atan2(this.dy, this.dx);
+            let newAngle = currentAngle + (Math.random() - 0.5) * 0.1;
+            this.dx = Math.cos(newAngle) * this.speed;
+            this.dy = Math.sin(newAngle) * this.speed;
+        }
+    }
+
+    for (let i = 0; i < 14; i++) bolts.push(new GlowBolt());
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        bolts.forEach(b => b.draw());
+        requestAnimationFrame(animate);
+    }
+    animate();
+</script>
+</body>
+</html>
