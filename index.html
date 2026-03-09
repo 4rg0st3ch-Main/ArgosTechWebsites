@@ -15,22 +15,19 @@
             --neon-blue: #0ff;
             --dark-bg: #050505;
             --border-thin: 1px solid rgba(255, 255, 255, 0.1);
-            /* NEW: Add a variable for the glow intensity */
             --glow-strength: 0 0 15px rgba(0, 255, 255, 0.8);
         }
 
         .scanner-bar {
             position: absolute;
             width: 100%;
-            height: 2px; /* Slightly thicker */
+            height: 2px;
             background: linear-gradient(to bottom, transparent, var(--neon-blue), transparent);
-            /* BRIGHTER: Increased opacity and box-shadow */
             box-shadow: 0 0 25px var(--neon-blue), 0 0 10px #fff; 
             opacity: 0.8; 
-            animation: scan 4s linear infinite; /* Slightly faster scan */
+            animation: scan 4s linear infinite;
         }
 
-        /* Refined Global Typography */
         body { 
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; 
             background: var(--dark-bg); 
@@ -38,7 +35,7 @@
             margin: 0; 
             padding: 0; 
             overflow-x: hidden; 
-            font-weight: 400; /* Much cleaner weight */
+            font-weight: 400;
             line-height: 1.5;
         }
         
@@ -52,9 +49,7 @@
 
         .grid-line {
             position: absolute;
-            /* BRIGHTER: Changed from 0.03 to 0.12 */
             background: rgba(0, 255, 255, 0.12);
-            /* OPTIONAL: Add a subtle glow to every line */
             box-shadow: 0 0 5px rgba(0, 255, 255, 0.05);
         }
 
@@ -62,10 +57,9 @@
             position: absolute;
             width: 60px;
             height: 60px;
-            border: 2px solid var(--neon-purple); /* Thicker border */
+            border: 2px solid var(--neon-purple);
             border-radius: 4px;
             opacity: 0;
-            /* BRIGHTER: Added a purple drop-shadow */
             filter: drop-shadow(0 0 8px var(--neon-purple));
             animation: target 8s ease-in-out infinite;
         }
@@ -73,7 +67,6 @@
         @keyframes scan { 0% { top: -10%; } 100% { top: 110%; } }
         @keyframes target { 0%, 100% { opacity: 0; transform: scale(0.8); } 50% { opacity: 0.2; transform: scale(1.1); } }
 
-        /* Splash - Sleeker Buttons */
         #splash { position: fixed; inset: 0; background: black; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
         .init-btn { 
             background: rgba(0, 255, 255, 0.05); 
@@ -89,7 +82,6 @@
         }
         .init-btn:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 20px var(--neon-blue); }
 
-        /* Navigation - Minimalist */
         .nav-bar { 
             position: fixed; top: 0; left: 0; width: 100%; height: 60px; 
             background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px);
@@ -103,16 +95,13 @@
         }
         .nav-btn.active { color: var(--neon-blue); border-bottom: 1px solid var(--neon-blue); }
 
-        /* Admin Controls */
         .admin-bar { position: fixed; top: 70px; right: 20px; display: none; gap: 8px; z-index: 1000; background: rgba(10,10,10,0.9); padding: 8px; border-radius: 4px; border: var(--border-thin); }
         .admin-bar input { width: 60px; background: #000; border: 1px solid #333; color: #fff; padding: 4px; font-size: 12px; }
 
-        /* Screen Layout */
         .screen { display: none; padding: 100px 40px 40px 40px; animation: fadeIn 0.4s ease-in; }
         .active-screen { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Bracket Components - Refined */
         .bracket-wrapper { display: flex; flex-direction: column; align-items: center; gap: 40px; }
         .round-container { display: flex; gap: 40px; margin-top: 20px; }
         .matchup { 
@@ -123,15 +112,14 @@
             margin-bottom: 15px;
             min-width: 200px;
         }
-        input[type="text"] { 
+        input[type="text"], input[type="number"], input[type="email"], input[type="password"] { 
             width: 90%; padding: 8px; background: rgba(0,0,0,0.5); 
             border: 1px solid #333; color: var(--neon-blue); 
             font-weight: 400; border-radius: 2px; font-size: 13px; outline: none; 
             transition: 0.2s;
         }
-        input[type="text"]:focus { border-color: var(--neon-purple); background: #000; }
+        input:focus { border-color: var(--neon-purple); background: #000; }
 
-        /* Registration */
         .register-box { 
             position: fixed; bottom: 30px; right: 30px; width: 220px; 
             background: rgba(5, 5, 10, 0.9); padding: 20px; border-radius: 4px; 
@@ -141,13 +129,12 @@
         }
         .reg-btn { background: var(--neon-purple); color: #fff; width: 100%; padding: 10px; font-weight: 500; border: none; margin-top: 10px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
 
-        /* Titles - Less Overwhelming */
         h1 { font-size: 2.5rem; font-weight: 300; letter-spacing: 8px; margin-bottom: 0.5rem; }
         h2 { color: var(--neon-purple); font-size: 1.2rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 400; border-left: 2px solid var(--neon-purple); padding-left: 15px; margin-bottom: 25px; }
         h3 { font-size: 11px; color: #555; text-transform: uppercase; margin: 10px 0; font-weight: 600; letter-spacing: 1px; }
         .glow-p { color: #fff; text-shadow: 0 0 10px rgba(188, 19, 254, 0.5); }
         
-        .win-btn { font-weight: 500; font-size: 10px; border-radius: 2px; }
+        .win-btn, .lose-btn { font-weight: 500; font-size: 10px; border-radius: 2px; }
         table { border-collapse: collapse; }
         th { font-weight: 500; font-size: 0.9rem; color: var(--neon-blue); text-align: left; padding: 10px; border-bottom: 1px solid #222; }
         td { padding: 10px; border-bottom: 1px solid #111; font-size: 0.9rem; }
@@ -192,8 +179,18 @@
 <div id="leaderboard-screen" class="screen">
     <div class="leaderboard-container" style="max-width: 600px; margin: auto;">
         <h2 style="color:var(--neon-blue); border-color:var(--neon-blue)">Rankings</h2>
+        
+        <div class="admin-only" style="display:none; flex-direction:column; gap:10px; margin-bottom:20px; padding:15px; border:1px solid var(--neon-blue); background:rgba(0,255,255,0.05);">
+            <h3 style="color:var(--neon-blue); margin-top:0;">Manual Rank Override</h3>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="newRankTeam" placeholder="Team Name" style="flex:2">
+                <input type="number" id="newRankWins" placeholder="Wins" style="flex:1">
+                <button onclick="addRankedTeam()" style="background:var(--neon-blue); color:black; border:none; padding:5px 15px; cursor:pointer; font-weight:bold; font-size:10px;">ADD/UPDATE</button>
+            </div>
+        </div>
+
         <table style="width:100%">
-            <thead><tr><th>Rank</th><th>Team</th><th>Wins</th></tr></thead>
+            <thead><tr><th>Rank</th><th>Team</th><th>Wins</th><th>Actions</th></tr></thead>
             <tbody id="leaderboard-body"></tbody>
         </table>
     </div>
@@ -209,9 +206,6 @@
 </div>
 
 <script>
-    /* ALL FUNCTIONAL LOGIC BELOW REMAINS 100% THE SAME 
-       ONLY CSS CLASSES AND STRUCTURAL TAGS IN SCRIPT MODIFIED FOR THE NEW LOOK
-    */
     const music = document.getElementById('bgMusic');
     
     function createGrid() {
@@ -332,7 +326,7 @@
                     let losePath = `l1-m${m}-t${t}`;
                     slot.innerHTML = `
                         <input type="text" id="${id}" value="${data[id]||''}" onchange="updateDb('${id}', this.value)">
-                        <div class="admin-only" style="display:none; gap:2px;">
+                        <div class="admin-only" style="display:${isAdmin?'flex':'none'}; gap:2px;">
                             <button class="win-btn" style="background:#0a4; color:white; border:none; padding:4px; cursor:pointer;" onclick="move('${id}', '${winPath}')">W</button>
                             ${!isLosers ? `<button class="lose-btn" style="background:#822; color:white; border:none; padding:4px; cursor:pointer;" onclick="move('${id}', '${losePath}')">L</button>` : ''}
                         </div>
@@ -351,6 +345,8 @@
         if(document.getElementById('passInput').value === "strider101") {
             isAdmin = true;
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+            // Refresh visuals
+            db.ref('leaderboard').once('value', snap => renderLeaderboard(snap.val() || {}));
             alert("Admin Access Authorized");
         }
     }
@@ -359,6 +355,47 @@
     function updateDb(id, val) { if(isAdmin) db.ref('bracket/'+id).set(val); }
     function updateConfig() { db.ref('config').set({ maxTeams: parseInt(document.getElementById('maxTeamsInput').value) }); }
     function nukeAll() { if(confirm("CLEAR ALL DATA?")) db.ref('/').set(null).then(()=>location.reload()); }
+
+    // RANKING SYSTEM FUNCTIONS
+    function addRankedTeam() {
+        const team = document.getElementById('newRankTeam').value.trim();
+        const wins = parseInt(document.getElementById('newRankWins').value) || 0;
+        if(team && isAdmin) {
+            const teamId = team.replace(/\s+/g, '_').toLowerCase();
+            db.ref('leaderboard/' + teamId).set({ team: team, wins: wins });
+            document.getElementById('newRankTeam').value = '';
+            document.getElementById('newRankWins').value = '';
+        }
+    }
+
+    function updateWins(teamId, currentWins, amount) {
+        if(isAdmin) db.ref('leaderboard/' + teamId).update({ wins: Math.max(0, currentWins + amount) });
+    }
+
+    function deleteRank(teamId) {
+        if(isAdmin && confirm("Purge this squad from records?")) db.ref('leaderboard/' + teamId).remove();
+    }
+
+    function renderLeaderboard(data) {
+        const body = document.getElementById('leaderboard-body'); 
+        body.innerHTML = '';
+        const items = Object.keys(data).map(key => ({ id: key, ...data[key] })).sort((a,b) => b.wins - a.wins);
+        items.forEach((item, i) => {
+            body.innerHTML += `
+                <tr>
+                    <td>#${i+1}</td>
+                    <td>${item.team}</td>
+                    <td>${item.wins}</td>
+                    <td>
+                        <div class="admin-only" style="display:${isAdmin ? 'flex' : 'none'}; gap:5px;">
+                            <button onclick="updateWins('${item.id}', ${item.wins}, 1)" style="background:#0a4; color:white; border:none; padding:4px; cursor:pointer;">+</button>
+                            <button onclick="updateWins('${item.id}', ${item.wins}, -1)" style="background:#822; color:white; border:none; padding:4px; cursor:pointer;">-</button>
+                            <button onclick="deleteRank('${item.id}')" style="background:transparent; color:red; border:1px solid red; padding:4px; cursor:pointer; font-size:10px;">X</button>
+                        </div>
+                    </td>
+                </tr>`;
+        });
+    }
 
     function checkRegStatus(data) {
         let count = 0;
@@ -393,11 +430,7 @@
 
     db.ref('config').on('value', snap => { if(snap.exists()) currentConfig = snap.val(); });
     db.ref('bracket').on('value', snap => renderBracket(snap.val() || {}));
-    db.ref('leaderboard').on('value', snap => {
-        const body = document.getElementById('leaderboard-body'); body.innerHTML = '';
-        const items = Object.values(snap.val() || {}).sort((a,b) => b.wins - a.wins);
-        items.forEach((item, i) => { body.innerHTML += `<tr><td>#${i+1}</td><td>${item.team}</td><td>${item.wins}</td></tr>`; });
-    });
+    db.ref('leaderboard').on('value', snap => renderLeaderboard(snap.val() || {}));
 </script>
 </body>
 </html>
