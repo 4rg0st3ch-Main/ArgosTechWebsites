@@ -126,6 +126,24 @@
             border: 1px solid var(--neon-purple); z-index: 1001;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             display: none;
+            transition: all 0.3s ease;
+        }
+        .register-box.minimized {
+            height: 30px;
+            width: 150px;
+            padding: 10px;
+            overflow: hidden;
+        }
+        .min-toggle {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: none;
+            border: none;
+            color: var(--neon-purple);
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
         }
         .reg-btn { background: var(--neon-purple); color: #fff; width: 100%; padding: 10px; font-weight: 500; border: none; margin-top: 10px; cursor: pointer; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
 
@@ -197,17 +215,35 @@
 </div>
 
 <div class="register-box" id="regBox">
+    <button class="min-toggle" onclick="toggleMin()">▼</button>
     <h3 style="margin:0 0 15px 0; color:var(--neon-purple); text-align:center;">SQUAD ENROLLMENT</h3>
-    <input type="text" id="regTeamName" placeholder="Callsign" style="margin-bottom:8px; width:90%;">
-    <input type="email" id="regEmail" placeholder="Comms Email" style="margin-bottom:8px; width:90%;">
-    <input type="password" id="regPass" placeholder="Access Code" style="margin-bottom:8px; width:90%;">
-    <button class="reg-btn" onclick="registerTeam()">Deploy Squad</button>
-    <div class="spots-counter" id="spotsLeft" style="font-size:9px; margin-top:10px; text-align:center; color:#555;">SCANNING SLOTS...</div>
+    <div id="regContent">
+        <input type="text" id="regTeamName" placeholder="Callsign" style="margin-bottom:8px; width:90%;">
+        <input type="email" id="regEmail" placeholder="Comms Email" style="margin-bottom:8px; width:90%;">
+        <input type="password" id="regPass" placeholder="Access Code" style="margin-bottom:8px; width:90%;">
+        <button class="reg-btn" onclick="registerTeam()">Deploy Squad</button>
+        <div class="spots-counter" id="spotsLeft" style="font-size:9px; margin-top:10px; text-align:center; color:#555;">SCANNING SLOTS...</div>
+    </div>
 </div>
 
 <script>
     const music = document.getElementById('bgMusic');
     
+    function toggleMin() {
+        const box = document.getElementById('regBox');
+        const content = document.getElementById('regContent');
+        const btn = document.querySelector('.min-toggle');
+        if(box.classList.contains('minimized')) {
+            box.classList.remove('minimized');
+            content.style.display = 'block';
+            btn.innerText = '▼';
+        } else {
+            box.classList.add('minimized');
+            content.style.display = 'none';
+            btn.innerText = '▲';
+        }
+    }
+
     function createGrid() {
         const container = document.getElementById('laser-container');
         for(let i=0; i<25; i++) {
@@ -240,13 +276,13 @@
 
     // FIREBASE CONFIG
     const firebaseConfig = {
-        apiKey: "AIzaSyAEojqV48Km3cqmkxPmQIo1hdHICWd39jU",
-        authDomain: "mybracket-fda7e.firebaseapp.com",
-        databaseURL: "https://mybracket-fda7e-default-rtdb.firebaseio.com",
-        projectId: "mybracket-fda7e",
-        storageBucket: "mybracket-fda7e.firebasestorage.app",
-        messagingSenderId: "140220506190",
-        appId: "1:140220506190:web:33ad68013b3642d6aaa31f"
+    apiKey: "AIzaSyATnD8WrsBG7mj31pvuNTQPNkVfR1B4Eso",
+    authDomain: "bracketserver-94d6e.firebaseapp.com",
+    databaseURL: "https://bracketserver-94d6e-default-rtdb.firebaseio.com",
+    projectId: "bracketserver-94d6e",
+    storageBucket: "bracketserver-94d6e.firebasestorage.app",
+    messagingSenderId: "1065482622043",
+    appId: "1:1065482622043:web:919883d7710bc226e05b7e"
     };
 
     firebase.initializeApp(firebaseConfig);
