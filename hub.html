@@ -51,22 +51,6 @@
             animation: shoot linear infinite;
         }
 
-
-        .field-grid .card {
-            padding: 0; /* Remove padding so image touches the border */
-            overflow: hidden;
-            height: 250px; /* Uniform height for all containers */
-            display: flex;
-        }
-
-        /* Make the actual image fill the container perfectly */
-        .field-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* This crops the image to fill the box without distorting */
-            display: block;
-        }
-
         @keyframes shoot {
             0% { transform: translateX(-100%) translateY(0); opacity: 0; }
             5% { opacity: 1; }
@@ -107,7 +91,38 @@
         .glow-b { color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
-        .card { border: 1px solid var(--neon-purple); padding: 20px; background: rgba(10, 10, 10, 0.9); text-align: center; }
+        
+        /* UPDATED CARD & IMAGE LOGIC */
+        .card { 
+            border: 1px solid var(--neon-purple); 
+            padding: 20px; 
+            background: rgba(10, 10, 10, 0.9); 
+            text-align: center; 
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .dropdown-img-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.3s ease;
+            margin-top: 0;
+        }
+
+        .card:hover .dropdown-img-container,
+        .card.toggled .dropdown-img-container {
+            max-height: 300px; /* Adjust based on desired image height */
+            margin-top: 15px;
+        }
+
+        .field-img {
+            width: 100%;
+            height: auto;
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            display: block;
+        }
 
         /* Leaderboard Styling */
         #leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: rgba(0,0,0,0.5); }
@@ -179,19 +194,35 @@
             <h2 class="glow-p">Squad Briefing</h2>
             <p style="text-align: center;">The ultimate tactical arena powered by Argos Technology. Pure IR precision.</p>
             <div class="grid">
-                <div class="card"><h3>Tactical Ops</h3></div>
-                <div class="card"><h3>Zero Latency</h3></div>
+                <div class="card" onclick="toggleCard(this)">
+                    <h3>Tactical Ops</h3>
+                    <div class="dropdown-img-container">
+                        <img src="https://via.placeholder.com/400x200/bc13fe/ffffff?text=Tactical+Ops" class="field-img" alt="Ops">
+                    </div>
+                </div>
+                <div class="card" onclick="toggleCard(this)">
+                    <h3>Zero Latency</h3>
+                    <div class="dropdown-img-container">
+                        <img src="https://via.placeholder.com/400x200/00ffff/000000?text=Zero+Latency" class="field-img" alt="Latency">
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="field" class="page-content">
             <h2 class="glow-b">The Killzone</h2>
             <div class="grid field-grid">
-                <div class="card">
-                    <img src="20260306_193915.jpg" class="field-img" alt="Field 1">
+                <div class="card" onclick="toggleCard(this)">
+                    <h3>Sector A-1</h3>
+                    <div class="dropdown-img-container">
+                        <img src="20260306_193915.jpg" class="field-img" alt="Field 1">
+                    </div>
                 </div>
-                <div class="card">
-                    <img src="20260306_195213.jpg" class="field-img" alt="Field 2">
+                <div class="card" onclick="toggleCard(this)">
+                    <h3>Sector B-4</h3>
+                    <div class="dropdown-img-container">
+                        <img src="20260306_195213.jpg" class="field-img" alt="Field 2">
+                    </div>
                 </div>
             </div>
         </div>
@@ -199,8 +230,18 @@
         <div id="equipment" class="page-content">
             <h2 class="glow-p">Weaponry & Tech</h2>
             <div class="grid">
-                <div class="card"><h3>Argos Mark V</h3></div>
-                <div class="card"><h3>Vortex Vest</h3></div>
+                <div class="card" onclick="toggleCard(this)">
+                    <h3>Argos Mark V</h3>
+                    <div class="dropdown-img-container">
+                        <img src="https://via.placeholder.com/400x200/bc13fe/ffffff?text=Mark+V+Rifle" class="field-img" alt="Rifle">
+                    </div>
+                </div>
+                <div class="card" onclick="toggleCard(this)">
+                    <h3>Vortex Vest</h3>
+                    <div class="dropdown-img-container">
+                        <img src="https://via.placeholder.com/400x200/00ffff/000000?text=Vortex+Vest" class="field-img" alt="Vest">
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -215,8 +256,7 @@
                         <th>Victories</th>
                     </tr>
                 </thead>
-                <tbody id="leaderboard-body">
-                    </tbody>
+                <tbody id="leaderboard-body"></tbody>
             </table>
         </div>
 
@@ -231,20 +271,24 @@
     </footer>
 
     <script>
-        // FIREBASE CONFIG
+        // TOGGLE LOGIC
+        function toggleCard(cardElement) {
+            cardElement.classList.toggle('toggled');
+        }
+
+        // FIREBASE CONFIG (Your existing config)
         const firebaseConfig = {
-        apiKey: "AIzaSyATnD8WrsBG7mj31pvuNTQPNkVfR1B4Eso",
-        authDomain: "bracketserver-94d6e.firebaseapp.com",
-        databaseURL: "https://bracketserver-94d6e-default-rtdb.firebaseio.com",
-        projectId: "bracketserver-94d6e",
-        storageBucket: "bracketserver-94d6e.firebasestorage.app",
-        messagingSenderId: "1065482622043",
-        appId: "1:1065482622043:web:919883d7710bc226e05b7e"
+            apiKey: "AIzaSyATnD8WrsBG7mj31pvuNTQPNkVfR1B4Eso",
+            authDomain: "bracketserver-94d6e.firebaseapp.com",
+            databaseURL: "https://bracketserver-94d6e-default-rtdb.firebaseio.com",
+            projectId: "bracketserver-94d6e",
+            storageBucket: "bracketserver-94d6e.firebasestorage.app",
+            messagingSenderId: "1065482622043",
+            appId: "1:1065482622043:web:919883d7710bc226e05b7e"
         };
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
         const music = document.getElementById('bgMusic');
 
         function createLasers() {
@@ -270,14 +314,8 @@
             document.getElementById('splash').style.display = 'none';
             document.getElementById('mainNav').style.display = 'flex';
             createLasers();
-            
             music.volume = 0.1;
-            let playPromise = music.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log("Auto-play was prevented.");
-                });
-            }
+            music.play().catch(e => console.log("Audio play blocked"));
         }
 
         function showPage(id) {
@@ -296,11 +334,9 @@
             }
         }
 
-        // FIREBASE LEADERBOARD LISTENER
         db.ref('leaderboard').on('value', snap => {
             const body = document.getElementById('leaderboard-body');
             body.innerHTML = '';
-            
             if (snap.exists()) {
                 const items = Object.values(snap.val()).sort((a, b) => b.wins - a.wins);
                 items.forEach((item, i) => {
@@ -309,8 +345,7 @@
                             <td style="color:var(--neon-purple); font-weight:bold;">0${i+1}</td>
                             <td>${item.team}</td>
                             <td style="color:var(--neon-blue);">${item.wins}</td>
-                        </tr>
-                    `;
+                        </tr>`;
                 });
             } else {
                 body.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#555;">NO DATA TRANSMITTED</td></tr>';
