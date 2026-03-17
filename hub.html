@@ -103,6 +103,12 @@
             position: relative;
         }
 
+        .field-grid .card {
+            padding: 15px; /* Adds a little breathing room */
+            height: auto;  /* Removes the fixed 250px height */
+            display: block; /* Changes from flex to block for vertical stacking */
+        }
+
         .dropdown-img-container {
             max-height: 0;
             overflow: hidden;
@@ -112,16 +118,17 @@
 
         .card:hover .dropdown-img-container,
         .card.toggled .dropdown-img-container {
-            max-height: 300px; /* Adjust based on desired image height */
+            max-height: 1000px; /* Increased from 300px to ensure nothing is cut off */
             margin-top: 15px;
         }
 
         .field-img {
             width: 100%;
-            height: auto;
-            border: 1px solid var(--neon-blue);
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+            height: auto;   /* Scales height based on width */
+            object-fit: contain; /* Ensures the whole image is visible */
             display: block;
+            border: 1px solid var(--neon-blue);
+            margin-top: 10px;
         }
 
         /* Leaderboard Styling */
@@ -212,18 +219,20 @@
         <div id="field" class="page-content">
             <h2 class="glow-b">The Killzone</h2>
             <div class="grid field-grid">
+                
                 <div class="card" onclick="toggleCard(this)">
-                    <h3>Sector A-1</h3>
-                    <div class="dropdown-img-container">
+                    <h3>Sector Alpha</h3> <div class="dropdown-img-container">
                         <img src="20260306_193915.jpg" class="field-img" alt="Field 1">
                     </div>
                 </div>
+
                 <div class="card" onclick="toggleCard(this)">
-                    <h3>Sector B-4</h3>
+                    <h3>Sector Bravo</h3>
                     <div class="dropdown-img-container">
                         <img src="20260306_195213.jpg" class="field-img" alt="Field 2">
                     </div>
                 </div>
+
             </div>
         </div>
 
