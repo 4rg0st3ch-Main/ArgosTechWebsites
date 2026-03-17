@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blast Warfare | Argos Technology</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --neon-purple: #bc13fe;
+            --neon-blue: #0ff;
+            --dark-bg: #050505;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--dark-bg);
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Laser Background Animation */
+        #laser-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: black;
+        }
+
+        .laser {
+            position: absolute;
+            background: linear-gradient(to right, transparent, var(--neon-blue), white);
+            height: 2px;
+            border-radius: 2px;
+            filter: blur(1px);
+            box-shadow: 0 0 10px var(--neon-blue);
+            animation: shoot linear infinite;
+        }
+
+        @keyframes shoot {
+            0% { transform: translateX(-100%) translateY(0); opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { transform: translateX(2000px) translateY(200px); opacity: 0; }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            border-bottom: 2px solid var(--neon-purple);
+            display: none; 
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            z-index: 1000;
+        }
+
+        .logo { font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
+        .logo span { color: var(--neon-blue); }
+
+        .menu { display: flex; gap: 20px; align-items: center; }
+        .menu a { color: white; text-decoration: none; text-transform: uppercase; font-size: 0.75rem; cursor: pointer; letter-spacing: 1px; }
+        .menu a:hover { color: var(--neon-purple); text-shadow: 0 0 8px var(--neon-purple); }
+
+        /* Sections */
+        .container { flex: 1; padding: 120px 20px 60px; max-width: 1000px; margin: auto; width: 100%; }
+        .page-content { display: none; animation: fadeIn 0.5s ease; }
+        .active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        h2 { text-transform: uppercase; text-align: center; letter-spacing: 5px; }
+        .glow-p { color: var(--neon-purple); text-shadow: 0 0 15px var(--neon-purple); }
+        .glow-b { color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
+        .card { border: 1px solid var(--neon-purple); padding: 20px; background: rgba(10, 10, 10, 0.9); text-align: center; }
+
+        /* Leaderboard Styling */
+        #leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: rgba(0,0,0,0.5); }
+        #leaderboard-table th { color: var(--neon-blue); text-align: left; padding: 12px; border-bottom: 1px solid var(--neon-blue); text-transform: uppercase; font-size: 0.8rem; }
+        #leaderboard-table td { padding: 12px; border-bottom: 1px solid #222; font-size: 0.9rem; }
+        #leaderboard-table tr:hover { background: rgba(188, 19, 254, 0.1); }
+
+        /* Splash */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .init-btn {
+            background: transparent;
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            padding: 15px 40px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #222;
+            color: #444;
+            font-size: 0.8rem;
+            background: black;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="laser-container"></div>
+
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="splash">
+        <h1 class="glow-p">BLAST WARFARE</h1>
+        <p>ARGOS TECHNOLOGY</p>
+        <button class="init-btn" onclick="init()">Initialize Mission</button>
+    </div>
+
+    <nav id="mainNav">
+        <div class="logo">ARGOS TECHNOLOGY // <span>BLAST WARFARE</span></div>
+        <div class="menu">
+            <a onclick="showPage('about')">Brief</a>
+            <a onclick="showPage('field')">Field</a>
+            <a onclick="showPage('equipment')">Armory</a>
+            <a onclick="showPage('leaderboard')">Ranks</a>
+            <a onclick="showPage('comingsoon')">Future</a>
+            <a onclick="toggleMute()" id="mute-link">Mute Audio</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="about" class="page-content active">
+            <h2 class="glow-p">Squad Briefing</h2>
+            <p style="text-align: center;">The ultimate tactical arena powered by Argos Technology. Pure IR precision.</p>
+            <div class="grid">
+                <div class="card"><h3>Tactical Ops</h3></div>
+                <div class="card"><h3>Zero Latency</h3></div>
+            </div>
+        </div>
+
+        <div id="field" class="page-content">
+            <h2 class="glow-b">The Killzone</h2>
+            <div class="grid">
+                <div class="card" style="height:200px; display:flex; align-items:center; justify-content:center;">Map Data [IMAGE 1]</div>
+                <div class="card" style="height:200px; display:flex; align-items:center; justify-content:center;">Map Data [IMAGE 2]</div>
+            </div>
+        </div>
+
+        <div id="equipment" class="page-content">
+            <h2 class="glow-p">Weaponry & Tech</h2>
+            <div class="grid">
+                <div class="card"><h3>Argos Mark V</h3></div>
+                <div class="card"><h3>Vortex Vest</h3></div>
+            </div>
+        </div>
+
+        <div id="leaderboard" class="page-content">
+            <h2 class="glow-b">Hall of Legends</h2>
+            <p style="text-align:center;">Ranking the top tactical units in the sector.</p>
+            <table id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Squad Name</th>
+                        <th>Victories</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="comingsoon" class="page-content">
+            <h2 class="glow-p">Classified Files</h2>
+            <p style="text-align:center;">Project "Neon Ghost" arriving Q4 2026.</p>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 Argos Technology. All Rights Reserved. | Blast Warfare Laser Tag
+    </footer>
+
+    <script>
+        // FIREBASE CONFIG
+        const firebaseConfig = {
+        apiKey: "AIzaSyATnD8WrsBG7mj31pvuNTQPNkVfR1B4Eso",
+        authDomain: "bracketserver-94d6e.firebaseapp.com",
+        databaseURL: "https://bracketserver-94d6e-default-rtdb.firebaseio.com",
+        projectId: "bracketserver-94d6e",
+        storageBucket: "bracketserver-94d6e.firebasestorage.app",
+        messagingSenderId: "1065482622043",
+        appId: "1:1065482622043:web:919883d7710bc226e05b7e"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const music = document.getElementById('bgMusic');
+
+        function createLasers() {
+            const container = document.getElementById('laser-container');
+            for(let i=0; i<15; i++) {
+                let laser = document.createElement('div');
+                laser.className = 'laser';
+                let startTop = Math.random() * 100;
+                let duration = 1 + Math.random() * 3;
+                let delay = Math.random() * 5;
+                let color = Math.random() > 0.5 ? 'var(--neon-blue)' : 'var(--neon-purple)';
+                laser.style.top = startTop + '%';
+                laser.style.width = (50 + Math.random() * 100) + 'px';
+                laser.style.animationDuration = duration + 's';
+                laser.style.animationDelay = delay + 's';
+                laser.style.background = `linear-gradient(to right, transparent, ${color}, white)`;
+                laser.style.boxShadow = `0 0 10px ${color}`;
+                container.appendChild(laser);
+            }
+        }
+
+        function init() {
+            document.getElementById('splash').style.display = 'none';
+            document.getElementById('mainNav').style.display = 'flex';
+            createLasers();
+            
+            music.volume = 0.1;
+            let playPromise = music.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Auto-play was prevented.");
+                });
+            }
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function toggleMute() {
+            const link = document.getElementById('mute-link');
+            if (music.paused) {
+                music.play();
+                link.innerText = "Mute Audio";
+            } else {
+                music.pause();
+                link.innerText = "Unmute Audio";
+            }
+        }
+
+        // FIREBASE LEADERBOARD LISTENER
+        db.ref('leaderboard').on('value', snap => {
+            const body = document.getElementById('leaderboard-body');
+            body.innerHTML = '';
+            
+            if (snap.exists()) {
+                const items = Object.values(snap.val()).sort((a, b) => b.wins - a.wins);
+                items.forEach((item, i) => {
+                    body.innerHTML += `
+                        <tr>
+                            <td style="color:var(--neon-purple); font-weight:bold;">0${i+1}</td>
+                            <td>${item.team}</td>
+                            <td style="color:var(--neon-blue);">${item.wins}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                body.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#555;">NO DATA TRANSMITTED</td></tr>';
+            }
+        });
+    </script>
+</body>
+</html>
