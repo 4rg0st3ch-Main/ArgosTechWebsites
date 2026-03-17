@@ -51,6 +51,22 @@
             animation: shoot linear infinite;
         }
 
+
+        .field-grid .card {
+            padding: 0; /* Remove padding so image touches the border */
+            overflow: hidden;
+            height: 250px; /* Uniform height for all containers */
+            display: flex;
+        }
+
+        /* Make the actual image fill the container perfectly */
+        .field-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* This crops the image to fill the box without distorting */
+            display: block;
+        }
+
         @keyframes shoot {
             0% { transform: translateX(-100%) translateY(0); opacity: 0; }
             5% { opacity: 1; }
@@ -170,9 +186,13 @@
 
         <div id="field" class="page-content">
             <h2 class="glow-b">The Killzone</h2>
-            <div class="grid">
-                <img src="20260306_193915.jpg" class="card" style="height:200px; display:flex; align-items:center; justify-content:center;">
-                <img src="20260306_195213.jpg" class="card" style="height:200px; display:flex; align-items:center; justify-content:center;">
+            <div class="grid field-grid">
+                <div class="card">
+                    <img src="20260306_193915.jpg" class="field-img" alt="Field 1">
+                </div>
+                <div class="card">
+                    <img src="20260306_195213.jpg" class="field-img" alt="Field 2">
+                </div>
             </div>
         </div>
 
