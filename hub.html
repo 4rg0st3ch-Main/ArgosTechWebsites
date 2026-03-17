@@ -90,9 +90,16 @@
         .glow-p { color: var(--neon-purple); text-shadow: 0 0 15px var(--neon-purple); }
         .glow-b { color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue); }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-top: 30px; }
-        
-        /* UPDATED CARD & IMAGE LOGIC */
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; 
+            margin-top: 30px;
+            align-items: start; /* THIS IS THE KEY: it stops boxes from stretching to match their neighbor */
+        }
+
+        /* 2. Update the card to handle its own sizing */
         .card { 
             border: 1px solid var(--neon-purple); 
             padding: 20px; 
@@ -101,12 +108,14 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
+            height: fit-content; /* Ensure the box only takes up as much space as it needs */
         }
 
+        /* 3. Refine the Field Grid specifically */
         .field-grid .card {
-            padding: 15px; /* Adds a little breathing room */
-            height: auto;  /* Removes the fixed 250px height */
-            display: block; /* Changes from flex to block for vertical stacking */
+            padding: 15px;
+            display: block; 
+            /* Remove any height: auto if it's conflicting */
         }
 
         .dropdown-img-container {
